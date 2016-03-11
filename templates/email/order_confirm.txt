@@ -1,0 +1,6 @@
+Hello {{ message.name }}, thanks so much for getting in touch with us. We'll get back to you as soon as we can!
+
+Sincerely,
+
+The Code Cooperative
+www.code.coop

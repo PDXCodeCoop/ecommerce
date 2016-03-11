@@ -1,0 +1,9 @@
+{% load staticfiles %}
+    <!-- delete 'data-env' to make legit payments -->
+    <script src="{% static 'store/js/paypal-button.min.js' %}?merchant={{ request.session.paypalid }}"
+        data-env="sandbox"
+        data-button="buynow"
+        data-name="Template Site Checkout"
+        data-amount="{{ request.session.total }}"
+        async
+        ></script>

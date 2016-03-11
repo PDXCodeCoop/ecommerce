@@ -1,0 +1,35 @@
+{% extends "store/base.html" %}
+{% load staticfiles %}
+{% load get_item %}
+{% load sass_tags %}
+{% block head %}
+{{ block.super }}
+<link href="{% static 'store/css/checkout_products.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<section id="cart_items">
+	<div class="container">
+		{% include 'store/checkout_shipping.html' %}
+		<div class="review-payment">
+			<h3>Review & Payment</h3>
+		</div>
+		{% include 'store/checkout_products.html' %}
+		{% if request.session.total > 1 and shipping %}
+		<div class="payment-options pull-right">
+		    <ul class="list-inline">
+		        <li>
+					{% include 'store/buttons/stripe_button.html' %}
+				</li>
+			</ul>
+		</div>
+		{% endif %}
+	</div>
+</section>
+{% endblock %}
+{% block js %}
+	{{ block.super}}
+	<script src="{% static 'store/js/checkout_products.js' %}"></script>
+
+	<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+	<script type="text/javascript" src="{% static 'store/js/stripe.js' %}"></script>
+{% endblock %}

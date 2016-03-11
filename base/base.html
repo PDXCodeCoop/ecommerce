@@ -1,0 +1,32 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>
+{% block title %}
+  Template Site
+{% endblock %}
+</title>
+{% block head %}
+    {% include 'base/head.html' %}
+{% endblock %}
+</head>
+<body>
+{% block navbar %}
+    {% include 'base/navbar.html' %}
+{% endblock %}
+{% block content %}
+
+{% endblock %}
+{% block modal %}
+
+{% endblock %}
+{% block footer %}
+    {% include 'base/footer.html' %}
+{% endblock %}
+{% block js %}
+    <script src="{% static 'jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap3.min.js' %}"></script>
+{% endblock %}
+</body>
+</html>

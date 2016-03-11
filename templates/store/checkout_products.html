@@ -1,0 +1,88 @@
+{% load thumbnail %}
+{% load staticfiles %}
+{% load get_item %}
+<div class="table-responsive cart_info">
+    <table class="table table-condensed">
+        <thead>
+            <tr class="cart_menu">
+                <td class="image">Item</td>
+                <td class="description"></td>
+                <td class="price">Price</td>
+                <td class="quantity">Quantity</td>
+                <td class="total">Total</td>
+                <td class="cart_delete pull-right"></td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td class="image">
+                    <a href="{% url 'store:products' product.pk %}"><img src="{% thumbnail product.mainimage 200x200 %}" alt=""></a>
+                </td>
+                <td class="description">
+                    <h4><a href="{% url 'store:products' product.pk %}">{{ product.title }}</a></h4>
+                    <p>Product ID: {{ product.pk }}</p>
+                    {% if product.status = "preorder" %}
+                    <span style="color:red">This item is currently out of stock, preorders can take a while to process</span>
+                    {% endif %}
+                </td>
+                <td class="price">
+                    <p>${{ product.total }}</p>
+                </td>
+                <td class="quantity cart_quantity">
+                    <div class="cart_quantity_button">
+                        <form action="{% url 'store:cartchange' %}" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" value="{{ product.pk }}" name="item_id" />
+                            <input class="cart_quantity_input" type="text" name="change" value="{{ request.session.cart|get_item:product.pk }}" autocomplete="off" size="2">
+                        </form>
+                    </div>
+                </td>
+                <td class="total cart_total">
+                    <p class="cart_total_price">${% widthratio product.total 1 request.session.cart|get_item:product.pk %}</p>
+                </td>
+                <td class="cart_delete">
+                    <a class="cart_quantity_delete" href="{% url 'store:cartdelete' product.pk %}"><i class="fa fa-times"></i></a>
+                </td>
+            </tr>
+            {% endfor %}
+
+
+            <tr>
+                <td colspan="4">&nbsp;</td>
+                <td colspan="2">
+                    <table class="table table-condensed total-result">
+                        <tr>
+                            <form action="" method="POST">
+                                {% csrf_token %}
+                                {% if coupon_result != None %}
+                                RESULT: {% if coupon_result %} Valid Coupon {% else %} Invalid Coupon {% endif %}
+                                {% endif %}
+                                <td><label for="coupon_code">Coupon Code</label></td>
+                                <td><input id="coupon_code" type="text" name="coupon_code" value="" autocomplete="off"></td>
+                            </form>
+                        </tr>
+                        <tr>
+                            <td>Cart Sub Total</td>
+                            <td>${{ request.session.subtotal }}</td>
+                        </tr>
+                        <tr class="shipping-cost">
+                            <td>Shipping Cost</td>
+                            <td>Free</td>
+                        </tr>
+                        {% if request.session.coupon|get_item:'amount' != None %}
+                        <tr class="discount">
+                            <td>Discount</td>
+                            <td>-${{ request.session.coupon|get_item:'amount' }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td>Total</td>
+                            <td><span>${{ request.session.total }}</span></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

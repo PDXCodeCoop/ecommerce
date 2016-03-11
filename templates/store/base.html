@@ -1,0 +1,18 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+{% block head %}
+    {{ block.super }}
+    <link href="{% static 'store/css/shop-homepage.css' %}" rel="stylesheet">
+    <link href="{% static 'store/css/main.css' %}" rel="stylesheet">
+    <!-- Will likely not need these -->
+    <link href="{% static 'store/css/font-awesome.min.css' %}" rel="stylesheet">
+{% endblock %}
+{% block navbar %}
+    {% include 'store/navbar.html' %}
+{% endblock %}
+{% block content %}
+{% endblock %}
+{% block js %}
+    {{ block.super }}
+    <!--<script src="{% static 'js/jquery.scrollUp.min.js' %}"></script>-->
+{% endblock %}

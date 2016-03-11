@@ -1,0 +1,23 @@
+
+<ul class ="nav navbar-nav navbar-right">
+    {% if request.user.is_authenticated %}
+    <li class="dropdown">
+        <a href="#" class="navbar-brand dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ request.user.username|title }} <span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+            <li><a href="{% url 'account:profile' %}">Profile</a></li>
+            <li><a href="{% url 'account:logout' %}">Log Out</a></li>
+            {% if request.user.is_superuser or request.user.is_staff %}
+                <li class = "divider"></li>
+                <li><a href="/admin/">Admin</a></li>
+                <li><a href="/api-view/">REST API</a></li>
+            {% endif %}
+        </ul>
+    </li>
+  {% else %}
+  <li>
+      <a href="{% url 'account:register' %}">Register/Login</a>
+  </li>
+  {% endif %}
+</ul>
+
+<!-- /.navbar-collapse -->

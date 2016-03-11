@@ -1,0 +1,57 @@
+{% extends "store/base.html" %}
+{% load thumbnail %}
+{% load staticfiles %}
+{% block content %}
+<!-- Page Content -->
+<div class="container">
+
+    <div class="row">
+
+        <div class="col-md-3">
+            <p class="lead">The Template Store</p>
+            <div class="list-group">
+              {% if categories|length > 0 %}
+                {% for category in categories %}
+                <a href="{% url 'store:productscat' category.slug %}" class="list-group-item">{{ category.title }}</a>
+                {% endfor %}
+              {% endif %}
+            </div>
+        </div>
+        <div class="col-md-9">
+
+            <div class="row">
+                {% for product in products %}
+                <div class="col-sm-4 col-lg-4 col-md-4">
+                    <div class="thumbnail">
+                        <a href="{% url 'store:products' product.pk %}">
+                            <img src="{% thumbnail product.mainimage 300x150 crop %}" alt="{{ product.title }}">
+                        </a>
+                        <div class="caption">
+                            <h4 class="pull-right">${{product.total}}</h4>
+                            <h4><a href="{% url 'store:products' product.pk %}">{{product.title}}</a>
+                            </h4>
+                            <p>{{ product.description }}</p>
+                        </div>
+                        <div class="ratings">
+                            <p class="pull-right">15 reviews</p>
+                            <p>
+                                <span class="glyphicon glyphicon-star"></span>
+                                <span class="glyphicon glyphicon-star"></span>
+                                <span class="glyphicon glyphicon-star"></span>
+                                <span class="glyphicon glyphicon-star"></span>
+                                <span class="glyphicon glyphicon-star"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- /.container -->
+{% endblock %}

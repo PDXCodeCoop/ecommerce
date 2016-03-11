@@ -1,0 +1,14 @@
+{% load staticfiles %}
+<form action="{% url 'store:charge' %}" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="cc-amount" value="{% widthratio request.session.total 1 100 %}">
+  <script
+    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+    data-key="<INSERT STRIPE PRODUCT KEY>"
+    data-name="Demo Site"
+    data-amount="{% widthratio request.session.total 1 100 %}"
+    data-description="Template Site's Charge Card"
+    data-image="{% static 'store/images/stripe_128x128.png' %}"
+    data-locale="auto">
+  </script>
+</form>
