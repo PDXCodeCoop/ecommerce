@@ -15,7 +15,7 @@ from account.models import UserForm
 
 def processStripe(request, customer = None):
     args = {}
-    stripe.api_key = "sk_test_Z0vRs9voszco0Gel9ytORJqQ"
+    stripe.api_key = "INSERT STRIPE KEY"
     token = request.POST['stripeToken']
     amount = request.POST['cc-amount']
     if customer is None:
