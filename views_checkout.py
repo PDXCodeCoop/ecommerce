@@ -12,10 +12,11 @@ import stripe
 
 from models import *
 from account.models import UserForm
+from django.conf import settings
 
 def processStripe(request, customer = None):
     args = {}
-    stripe.api_key = "INSERT STRIPE KEY"
+    stripe.api_key = settings.STRIPE_SECRET_KEY
     token = request.POST['stripeToken']
     amount = request.POST['cc-amount']
     if customer is None:
@@ -186,7 +187,6 @@ def getShipping(request):
 
 ### Checkout
 def checkout(request):
-    stripe.api_key = "sk_test_Z0vRs9voszco0Gel9ytORJqQ"
     args = {}; customer = None
     if 'coupon' in request.session:
         discount = request.session['coupon']['amount'];
@@ -211,6 +211,10 @@ def checkout(request):
     products = Product.objects.filter(pk__in = cart_list)
     request.session['subtotal'], request.session['total'] = totalCart(products, cart, discount, tax, shipping)
     shipping = getShipping(request)
+    if hasattr(settings, 'STRIPE_PUBLIC_KEY'):
+        args['stripe_pub_key'] = settings.STRIPE_PUBLIC_KEY
+    if hasattr(settings, 'PAYPAL_MERCHANT_ID'):
+        args['paypal_merchant_id'] = settings.PAYPAL_MERCHANT_ID
     args.update({
         'products': products,
         'customer': customer,
