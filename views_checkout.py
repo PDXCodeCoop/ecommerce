@@ -3,6 +3,7 @@ from __future__ import division
 from django.shortcuts import render_to_response,  get_object_or_404, redirect
 from django.template.context import RequestContext, Context
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 
 from django.core.mail import send_mail
@@ -40,7 +41,7 @@ def processStripe(request, customer = None):
                 request.user.billinginfo.save()
         order = processProducts(request, request.session.get('cart', {}))
         processEmail(order)
-        redirect("/store", args)
+        return HttpResponseRedirect( reverse('store:index') )
     except stripe.error.CardError, e:
         # The card has been declined
         args['cc_result'] = e
@@ -115,7 +116,7 @@ def charge(request):
     elif 'shipping' in request.session:
         args["shipping"] = request.session['shipping']
     else:
-        return redirect('/store/checkout')
+        return HttpResponseRedirect( reverse('store:checkout') )
     args = processStripe(request)
     return render_to_response('store/order-complete.html', RequestContext(request,args))
 
@@ -151,7 +152,7 @@ def shipping(request):
                 shipping.user = request.user
             shipping.save()
         else:
-            return redirect('/store/') #Report Error Here
+            return HttpResponseRedirect( reverse('store:index') ) #Report Error Here
         #Not the best way to handle a guest account
         #PLEASE CHANGE SOON
         request.session['shipping'] = {
@@ -163,14 +164,14 @@ def shipping(request):
             'postal_code':shipping.postal_code,
             'email':shipping.email,
         }
-    return redirect('/store/checkout')
+    return HttpResponseRedirect( reverse('store:checkout') )
 
 def delete_shipping(request):
     if request.user.is_authenticated() and request.user.shipping is not None:
         request.user.shipping.delete()
     if 'shipping' in request.session:
         del request.session['shipping']
-    return redirect('/store/checkout')
+    return HttpResponseRedirect( reverse('store:checkout') )
 
 def getShipping(request):
     if request.user.is_authenticated():
