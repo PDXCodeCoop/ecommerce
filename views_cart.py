@@ -7,7 +7,6 @@ from django.core.urlresolvers import reverse
 import stripe
 
 from models import *
-from account.models import UserForm
 
 def changeQuantity(request):
     cart = request.session.get('cart', {})

@@ -11,7 +11,6 @@ from django.template.loader import render_to_string
 import stripe
 
 from models import *
-from account.models import UserForm
 from django.conf import settings
 
 def processStripe(request, customer = None):
