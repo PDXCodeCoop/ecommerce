@@ -4,7 +4,7 @@
     <input type="hidden" name="cc-amount" value="{% widthratio request.session.total 1 100 %}">
   <script
     src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-    data-key="<INSERT STRIPE PRODUCT KEY>"
+    data-key="{{ stripe_pub_key }}"
     data-name="Demo Site"
     data-amount="{% widthratio request.session.total 1 100 %}"
     data-description="Template Site's Charge Card"
