@@ -40,8 +40,11 @@ def processStripe(request, customer = None):
                 request.user.billinginfo.stripe = customer.id
                 request.user.billinginfo.save()
         order = processProducts(request, request.session.get('cart', {}))
-        processEmail(order)
-        return HttpResponseRedirect( reverse('store:index') )
+        try:
+            processEmail(order)
+        except:
+            #Set a method to handle errors
+            pass
     except stripe.error.CardError, e:
         # The card has been declined
         args['cc_result'] = e
