@@ -24,6 +24,10 @@
     </div>
     <div class="col-md-4">
     <h3>{{ product.title }}</h3>
+    HERPDERP
+    {% for option in product.options.all %}
+        {{option.title}}
+    {% endfor %}
     {% if product.description|length > 0 %}
         {{ product.description|safe }}
     {% else %}

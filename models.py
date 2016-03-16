@@ -17,12 +17,39 @@ class Category(models.Model):
     def __unicode__(self):
         return self.title
 
+class OptionCategory(models.Model):
+    title = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100, unique=True)
+    def __unicode__(self):
+        return self.title
+
+class Option(models.Model):
+    title = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    stock = models.IntegerField(null=True, blank=True)
+    preorder = models.BooleanField(default = False)
+    category = models.ForeignKey(OptionCategory, blank=True, null=True)
+    def __unicode__(self):
+        return "%s: %s" % (self.category, self.title)
+
+class Accessory(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+    price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    discount = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    stock = models.IntegerField(null=True, blank=True)
+    preorder = models.BooleanField(default = False)
+    def __unicode__(self):
+        return "%s" % (self.title)
+
 # Create your models here.
 class Product(models.Model):
     mainimage = ThumbnailerImageField(upload_to='products', blank=True)
     title = models.CharField(max_length=100)
     subtitle = models.CharField(max_length=100, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    accessories = models.ManyToManyField(Accessory, blank=True)
+    options = models.ManyToManyField(OptionCategory, blank=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     discount = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     percent_off = models.IntegerField(default=0)
