@@ -24,16 +24,29 @@
     </div>
     <div class="col-md-4">
     <h3>{{ product.title }}</h3>
-    HERPDERP
-    {% for option in product.options.all %}
-        {{option.title}}
-    {% endfor %}
     {% if product.description|length > 0 %}
         {{ product.description|safe }}
     {% else %}
         {% lorem 100 w random %}
     {% endif %}
     <hr />
+    {% if optioncategories %}
+    {% for category in optioncategories %}
+    <h4>{{ category.title }}</h4>
+    <select>
+        {% for option in category.option_set.all %}
+        <option value="{{ option.title }}">{{ option.title }}</option>
+        {% endfor %}
+    </select>
+    {% endfor %}
+    <hr />
+    {% endif %}
+    {% if accessories %}
+    {% for accessory in accessories %}
+    <input checked type="checkbox" name="accessory_price" value="{{ accessory.price }}">{{ accessory.title }} ${{ accessory.price }}<br>
+    {% endfor %}
+    <hr />
+    {% endif %}
 	${{ product.total }} {% if product.price != product.total %}<strike style="color:red">${{ product.price }}</strike>{% endif %}</p>
     {% if product.status == "outofstock" %}
         Out of Stock
