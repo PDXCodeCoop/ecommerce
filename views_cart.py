@@ -26,8 +26,7 @@ def changeQuantity(request):
                 request.session['output'] = cart
             #Verify that the user is not taking too much stock
             if not (product.preorder or product.status() == "unlimited"):
-                if int(cart[product_id]) > int(product.stock):
-                    cart[product_id] = product.stock
+                cart[product_id] = product.set_limit(cart[product_id])
             if int(cart[product_id]) < 1:
                 del cart[product_id]
     request.session['cart'] = cart

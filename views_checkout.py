@@ -88,10 +88,10 @@ def processProducts(request, cart):
     #Edit the quantity of the products in stock
     for product in products:
         quantity = int(cart[str(product.pk)])
-        if product.status() != "unlimited":
-            if (not product.preorder) and quantity > product.stock:
-                quantity = product.stock
-            product.stock = product.stock - quantity
+        #Verify that the product does not go beyond the stock limit
+        if not (product.preorder or product.status() == "unlimited"):
+            quantity = product.set_limit(quantity)
+        product.stock = product.stock - quantity
         addProductToOrder(order, product, quantity)
         product.save()
     order.save()

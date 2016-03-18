@@ -54,11 +54,19 @@ class Product(models.Model):
     discount = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     percent_off = models.IntegerField(default=0)
     category = models.ForeignKey(Category, blank=True, null=True)
+    stock_limit = models.IntegerField(null=True, blank=True)
     stock = models.IntegerField(null=True, blank=True)
     preorder = models.BooleanField(default = False)
     featured = models.BooleanField(default = False)
     def total(self):
         return (self.price - self.discount) - (self.price * self.percent_off/100)
+    def set_limit(self, quantity):
+        quantity = int(quantity)
+        if self.stock_limit is not None and quantity > self.stock_limit:
+            quantity = self.stock_limit
+        if quantity > self.stock:
+            quantity = self.stock
+        return quantity
     def status(self):
         if self.stock is None: return "unlimited"
         if self.stock > 0: return "instock"
