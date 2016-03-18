@@ -54,7 +54,7 @@ class Product(models.Model):
     discount = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     percent_off = models.IntegerField(default=0)
     category = models.ForeignKey(Category, blank=True, null=True)
-    stock_limit = models.IntegerField(null=True, blank=True)
+    purchase_limit = models.IntegerField(null=True, blank=True)
     stock = models.IntegerField(null=True, blank=True)
     preorder = models.BooleanField(default = False)
     featured = models.BooleanField(default = False)
@@ -62,9 +62,9 @@ class Product(models.Model):
         return (self.price - self.discount) - (self.price * self.percent_off/100)
     def set_limit(self, quantity):
         quantity = int(quantity)
-        if self.stock_limit is not None and quantity > self.stock_limit:
-            quantity = self.stock_limit
-        if quantity > self.stock:
+        if self.purchase_limit is not None and quantity > self.purchase_limit:
+            quantity = self.purchase_limit
+        if self.stock is not None and quantity > self.stock:
             quantity = self.stock
         return quantity
     def status(self):
