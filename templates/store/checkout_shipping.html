@@ -27,7 +27,7 @@
             <fieldset>
                   {% for field in shippingform %}
                       {% if field.errors %}
-                          <div class="control-group error">
+                          <div class="control-group error col-sm-4">
                               <label class="control-label">{{ field.label }}</label>
                               <div class="controls">{{ field }}
                                   <span class="help-inline">
@@ -36,7 +36,7 @@
                               </div>
                           </div>
                       {% else %}
-                          <div class="control-group">
+                          <div class="control-group col-sm-4">
                               <label class="control-label">{{ field.label }}</label>
                               <div class="controls">{{ field }}
                                   {% if field.help_text %}
@@ -46,11 +46,12 @@
                           </div>
                       {% endif %}
                       {% if forloop.counter|divisibleby:2 %}
-                        <hr />
+                        <hr class="visible-xs" />
                       {% endif %}
                   {% endfor %}
               </fieldset>
-              <div class="form-actions">
+              <br />
+              <div class="form-actions col-sm-4">
                   <button type="submit" class="btn btn-primary" >Submit</button>
               </div>
           </form>
