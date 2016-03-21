@@ -1,0 +1,7 @@
+django
+easy-thumbnails
+djangorestframework
+stripe
+django-paypal
+django-ckeditor
+django-markdown

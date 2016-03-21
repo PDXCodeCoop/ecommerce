@@ -4,10 +4,32 @@ from models import *
 from django.contrib.auth.models import User
 from ckeditor.widgets import CKEditorWidget
 
+class OptionInline(admin.TabularInline):
+    model = Option
 
+class ProductInline(admin.TabularInline):
+    model = Product
+
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 3
 
 class ProductOrderInLine(admin.TabularInline):
     model = ProductOrder
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    inlines = [ ProductImageInline, ]
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    inlines = [ ProductInline, ]
+    prepopulated_fields = {'slug': ('title',)}
+
+@admin.register(OptionCategory)
+class OptionCategoryAdmin(admin.ModelAdmin):
+    inlines = [ OptionInline, ]
+    prepopulated_fields = {'slug': ('title',)}
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -15,19 +37,9 @@ class OrderAdmin(admin.ModelAdmin):
         ProductOrderInLine,
     ]
 
-class ProductImageInline(admin.TabularInline):
-    model = ProductImage
-    extra = 3
 
-class ProductAdmin(admin.ModelAdmin):
-    inlines = [ ProductImageInline, ]
-
-class CategoryAdmin(admin.ModelAdmin):
-    prepopulated_fields = {'slug': ('title',)}
-
-admin.site.register(Feature)
-admin.site.register(Product, ProductAdmin)
-admin.site.register(Category, CategoryAdmin)
+admin.site.register(Accessory)
+admin.site.register(Option)
 admin.site.register(Shipping)
 admin.site.register(BillingInfo)
 admin.site.register(Coupon)

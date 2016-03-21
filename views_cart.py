@@ -3,11 +3,11 @@ from __future__ import division
 from django.shortcuts import render_to_response,  get_object_or_404, redirect
 from django.template.context import RequestContext
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 
 import stripe
 
 from models import *
-from account.models import UserForm
 
 def changeQuantity(request):
     cart = request.session.get('cart', {})
@@ -31,7 +31,7 @@ def changeQuantity(request):
             if int(cart[product_id]) < 1:
                 del cart[product_id]
     request.session['cart'] = cart
-    return redirect("/store/checkout")
+    return HttpResponseRedirect( reverse('store:checkout') )
 
 def delete(request, product_id):
     cart = request.session.get('cart', {})
@@ -40,4 +40,4 @@ def delete(request, product_id):
         if 'coupon' in request.session:
             del request.session['coupon']
     request.session['cart'] = cart
-    return redirect("/store/checkout")
+    return HttpResponseRedirect( reverse('store:checkout') )

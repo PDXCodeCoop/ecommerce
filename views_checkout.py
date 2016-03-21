@@ -3,6 +3,7 @@ from __future__ import division
 from django.shortcuts import render_to_response,  get_object_or_404, redirect
 from django.template.context import RequestContext, Context
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 
 from django.core.mail import send_mail
@@ -11,11 +12,11 @@ from django.template.loader import render_to_string
 import stripe
 
 from models import *
-from account.models import UserForm
+from django.conf import settings
 
 def processStripe(request, customer = None):
     args = {}
-    stripe.api_key = "INSERT STRIPE KEY"
+    stripe.api_key = settings.STRIPE_SECRET_KEY
     token = request.POST['stripeToken']
     amount = request.POST['cc-amount']
     if customer is None:
@@ -39,8 +40,11 @@ def processStripe(request, customer = None):
                 request.user.billinginfo.stripe = customer.id
                 request.user.billinginfo.save()
         order = processProducts(request, request.session.get('cart', {}))
-        processEmail(order)
-        redirect("/store", args)
+        try:
+            processEmail(order)
+        except:
+            #Set a method to handle errors
+            pass
     except stripe.error.CardError, e:
         # The card has been declined
         args['cc_result'] = e
@@ -115,7 +119,7 @@ def charge(request):
     elif 'shipping' in request.session:
         args["shipping"] = request.session['shipping']
     else:
-        return redirect('/store/checkout')
+        return HttpResponseRedirect( reverse('store:checkout') )
     args = processStripe(request)
     return render_to_response('store/order-complete.html', RequestContext(request,args))
 
@@ -151,7 +155,7 @@ def shipping(request):
                 shipping.user = request.user
             shipping.save()
         else:
-            return redirect('/store/') #Report Error Here
+            return HttpResponseRedirect( reverse('store:index') ) #Report Error Here
         #Not the best way to handle a guest account
         #PLEASE CHANGE SOON
         request.session['shipping'] = {
@@ -163,14 +167,14 @@ def shipping(request):
             'postal_code':shipping.postal_code,
             'email':shipping.email,
         }
-    return redirect('/store/checkout')
+    return HttpResponseRedirect( reverse('store:checkout') )
 
 def delete_shipping(request):
     if request.user.is_authenticated() and request.user.shipping is not None:
         request.user.shipping.delete()
     if 'shipping' in request.session:
         del request.session['shipping']
-    return redirect('/store/checkout')
+    return HttpResponseRedirect( reverse('store:checkout') )
 
 def getShipping(request):
     if request.user.is_authenticated():
@@ -186,7 +190,6 @@ def getShipping(request):
 
 ### Checkout
 def checkout(request):
-    stripe.api_key = "sk_test_Z0vRs9voszco0Gel9ytORJqQ"
     args = {}; customer = None
     if 'coupon' in request.session:
         discount = request.session['coupon']['amount'];
@@ -211,6 +214,10 @@ def checkout(request):
     products = Product.objects.filter(pk__in = cart_list)
     request.session['subtotal'], request.session['total'] = totalCart(products, cart, discount, tax, shipping)
     shipping = getShipping(request)
+    if hasattr(settings, 'STRIPE_PUBLIC_KEY'):
+        args['stripe_pub_key'] = settings.STRIPE_PUBLIC_KEY
+    if hasattr(settings, 'PAYPAL_MERCHANT_ID'):
+        args['paypal_merchant_id'] = settings.PAYPAL_MERCHANT_ID
     args.update({
         'products': products,
         'customer': customer,
