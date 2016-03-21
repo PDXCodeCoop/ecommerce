@@ -1,8 +1,15 @@
 {% load thumbnail %}
 {% load staticfiles %}
 {% load get_item %}
+
+<style media="screen">
+  @-moz-document url-prefix() {
+fieldset { display: table-cell; }
+}
+</style>
+
 <div class="table-responsive cart_info">
-    <table class="table table-condensed">
+    <table class="table">
         <thead>
             <tr class="cart_menu">
                 <td class="image">Item</td>
