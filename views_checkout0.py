@@ -123,10 +123,10 @@ def charge(request):
     args = processStripe(request)
     return render_to_response('store/order-complete.html', RequestContext(request,args))
 
-def totalCart(products, discount = None, shipping = None, tax = None):
+def totalCart(products, cart, discount = None, shipping = None, tax = None):
     total = 0; subtotal = 0
     for product in products:
-        subtotal = subtotal + (float(product[4]))
+        subtotal = subtotal + (cart[str(product.pk)]['quantity'] * int(product.total()))
     #Handling Discounts, Taxes, and Shipping
     total = subtotal
     if discount is not None:
@@ -187,29 +187,6 @@ def getShipping(request):
     else:
         return None
 
-def getProductAccessory(item):
-    try:
-        return Accessory.objects.get(pk=item['accessory'])
-    except Accessory.DoesNotExist:
-        return None
-    except KeyError:
-        return None
-
-def getProductOption(item):
-    try:
-        return Option.objects.get(pk=item['option'])
-    except Option.DoesNotExist:
-        return None
-    except KeyError:
-        return None
-
-#Adds the total of all accessories and options
-def getProductTotal(product, accessory, option):
-    if accessory is None: accessory_price = 0
-    else: accessory_price = accessory.price
-    if option is None: option_price = 0
-    else: option_price = option.price
-    return product + accessory_price + option_price
 
 ### Checkout
 def checkout(request):
@@ -230,22 +207,18 @@ def checkout(request):
                 args['coupon_result'] = True
             else:
                 args['coupon_result'] = False
-    cart = request.session.get('cart', [])
-    products = []
-    for item in cart:
-        product = Product.objects.get(pk=item['product_id'])
-        accessory = getProductAccessory(item)
-        option = getProductOption(item)
-        price = getProductTotal(product.total(), accessory, option)
-        products.append([item, product, accessory, option, price])
-    request.session['subtotal'], request.session['total'] = totalCart(products, discount, tax, shipping)
+    cart = request.session.get('cart', {})
+    cart_list = []
+    for key in cart:
+        cart_list.append(key)
+    products = Product.objects.filter(pk__in = cart_list)
+    request.session['subtotal'], request.session['total'] = totalCart(products, cart, discount, tax, shipping)
     shipping = getShipping(request)
     if hasattr(settings, 'STRIPE_PUBLIC_KEY'):
         args['stripe_pub_key'] = settings.STRIPE_PUBLIC_KEY
     if hasattr(settings, 'PAYPAL_MERCHANT_ID'):
         args['paypal_merchant_id'] = settings.PAYPAL_MERCHANT_ID
     args.update({
-        'cart': cart,
         'products': products,
         'customer': customer,
         'shipping': shipping,

@@ -7,6 +7,7 @@ urlpatterns = [
        url('^checkout$', views.checkout, name='checkout'),
        url('^checkout/delete/([0-9]+)$', views.delete, name='cartdelete'),
        url('^cart/change$', views.changeQuantity, name='cartchange'),
+       url('^cart/add$', views.addToCart, name='addtocart'),
        #url('^checkout/change/(?P<product_id>-?\d+)/(?P<quantity>-?\d+)$', views.changeQuantity, name='cartchange'),
        url('^shipping$', views.shipping, name='shipping'),
        url('^shipping/delete', views.delete_shipping, name='delete_shipping'),
