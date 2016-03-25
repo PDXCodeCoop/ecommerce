@@ -42,8 +42,8 @@ fieldset { display: table-cell; }
                     <div class="cart_quantity_button">
                         <form action="{% url 'store:cartchange' %}" method="POST">
                             {% csrf_token %}
-                            <input type="hidden" value="{{ product.1.pk }}" name="item_id" />
-                            <input class="cart_quantity_input" type="text" name="change" value="{{ product.0.quantity }}" autocomplete="off" size="2">
+                            <input type="hidden" value="{{ forloop.counter0 }}" name="item_id" />
+                            <input class="cart_quantity_input" type="text" name="quantity" value="{{ product.0.quantity }}" autocomplete="off" size="2">
                         </form>
                     </div>
                 </td>

@@ -9,7 +9,7 @@ import stripe
 
 from models import *
 
-def setPostValue(request, value):
+def getPostValue(request, value):
     if value in request.POST:
         return request.POST[value]
     else:
@@ -26,33 +26,25 @@ def addToCart(request):
                 cart.append({
                     "product_id": product.pk,
                     "quantity": 1,
-                    "accessory": setPostValue(request, "accessory"),
-                    "option": setPostValue(request, "option"),
+                    "accessory": getPostValue(request, "accessory"),
+                    "option": getPostValue(request, "option"),
                     })
     request.session['cart'] = cart
     return HttpResponseRedirect( reverse('store:checkout') )
 
+#Changes the quantity in the cart
 def changeQuantity(request):
     cart = request.session.get('cart', {})
     if request.method == "POST":
-        if 'item_id' in request.POST:
-            product_id = request.POST['item_id']
-            product = get_object_or_404(Product, pk = product_id)
-            if 'add_quantity' in request.POST:
-                add_quantity = int(request.POST['add_quantity'])
-                if add_quantity > 0:
-                    try:
-                        cart[product_id] = int(cart[product_id]) + add_quantity
-                    except KeyError:
-                        cart[product_id] = add_quantity
-
-            if 'change' in request.POST:
-                cart[product_id] = request.POST['change']
-                request.session['output'] = cart
-            #Verify that the user is not taking too much stock
-            cart[product_id] = product.set_limit(cart[product_id])
-            if int(cart[product_id]) < 1:
-                del cart[product_id]
+        item_id = int(getPostValue(request, "item_id"))
+        item = cart[item_id]
+        try:
+            product = get_object_or_404(Product, pk = item['product_id'])
+            item['quantity'] = product.set_limit(int(getPostValue(request, "quantity")))
+            if item['quantity'] < 0:
+                del cart[item_id]
+        except Product.DoesNotExist:
+            del cart[item_id]
     request.session['cart'] = cart
     return HttpResponseRedirect( reverse('store:checkout') )
 

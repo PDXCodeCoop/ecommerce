@@ -14,6 +14,14 @@ import stripe
 from models import *
 from django.conf import settings
 
+def getModelObject(object, object_id):
+    try:
+        return object.objects.get(pk=object_id)
+    except object.DoesNotExist:
+        return None
+    except KeyError:
+        return None
+
 def processStripe(request, customer = None):
     args = {}
     stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -39,7 +47,7 @@ def processStripe(request, customer = None):
             else:
                 request.user.billinginfo.stripe = customer.id
                 request.user.billinginfo.save()
-        order = processProducts(request, request.session.get('cart', {}))
+        order = processProducts(request, request.session.get('cart', []))
         try:
             processEmail(order)
         except:
@@ -72,11 +80,18 @@ def processEmail(order):
             html_message=msg_html,
         )
 
+def setProducts(cart):
+    products = []
+    for item in cart:
+        product = Product.objects.get(pk=item['product_id'])
+        accessory = getModelObject(Accessory, item['accessory'])
+        option = getModelObject(Option, item['option'])
+        price = getProductTotal(product.total(), accessory, option)
+        products.append([item, product, accessory, option, price])
+    return products
+
 def processProducts(request, cart):
-    cart_list = []
-    for key in cart:
-        cart_list.append(key)
-    products = Product.objects.filter(pk__in = cart_list)
+    products = setProducts(request.session.get('cart', []))
     user = request.user
     if request.user.is_authenticated():
         address_text = str(user.shipping.name + " " + user.shipping.address + " " + user.shipping.city + ", " + user.shipping.state + " " + user.shipping.postal_code)
@@ -87,13 +102,14 @@ def processProducts(request, cart):
     order.save()
     #Edit the quantity of the products in stock
     for product in products:
-        quantity = int(cart[str(product.pk)])
+        quantity = product[0]['quantity']
         #Verify that the product does not go beyond the stock limit
-        if not (product.preorder or product.status() == "unlimited"):
-            quantity = product.set_limit(quantity)
-        product.stock = product.stock - quantity
-        addProductToOrder(order, product, quantity)
-        product.save()
+        if not (product[1].preorder or product[1].status() == "unlimited"):
+            quantity = product[1].set_limit(quantity)
+        if product[1].stock is not None:
+            product[1].stock = product[1].stock - quantity
+        addProductToOrder(order, product[1], quantity)
+        product[1].save()
     order.save()
     if 'coupon' in request.session:
         coupon = Coupon.objects.get(code=request.session['coupon']['code'])
@@ -187,22 +203,6 @@ def getShipping(request):
     else:
         return None
 
-def getProductAccessory(item):
-    try:
-        return Accessory.objects.get(pk=item['accessory'])
-    except Accessory.DoesNotExist:
-        return None
-    except KeyError:
-        return None
-
-def getProductOption(item):
-    try:
-        return Option.objects.get(pk=item['option'])
-    except Option.DoesNotExist:
-        return None
-    except KeyError:
-        return None
-
 #Adds the total of all accessories and options
 def getProductTotal(product, accessory, option):
     if accessory is None: accessory_price = 0
@@ -230,14 +230,7 @@ def checkout(request):
                 args['coupon_result'] = True
             else:
                 args['coupon_result'] = False
-    cart = request.session.get('cart', [])
-    products = []
-    for item in cart:
-        product = Product.objects.get(pk=item['product_id'])
-        accessory = getProductAccessory(item)
-        option = getProductOption(item)
-        price = getProductTotal(product.total(), accessory, option)
-        products.append([item, product, accessory, option, price])
+    products = setProducts(request.session.get('cart', []))
     request.session['subtotal'], request.session['total'] = totalCart(products, discount, tax, shipping)
     shipping = getShipping(request)
     if hasattr(settings, 'STRIPE_PUBLIC_KEY'):
@@ -245,7 +238,6 @@ def checkout(request):
     if hasattr(settings, 'PAYPAL_MERCHANT_ID'):
         args['paypal_merchant_id'] = settings.PAYPAL_MERCHANT_ID
     args.update({
-        'cart': cart,
         'products': products,
         'customer': customer,
         'shipping': shipping,
