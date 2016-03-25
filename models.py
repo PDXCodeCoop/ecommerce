@@ -25,7 +25,7 @@ class OptionCategory(models.Model):
 
 class Option(models.Model):
     title = models.CharField(max_length=100)
-    price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     stock = models.IntegerField(null=True, blank=True)
     preorder = models.BooleanField(default = False)
     category = models.ForeignKey(OptionCategory, blank=True, null=True)
@@ -35,7 +35,7 @@ class Option(models.Model):
 class Accessory(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
-    price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     discount = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     stock = models.IntegerField(null=True, blank=True)
     preorder = models.BooleanField(default = False)

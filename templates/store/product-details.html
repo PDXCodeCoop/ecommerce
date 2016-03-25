@@ -30,12 +30,14 @@
         {% lorem 100 w random %}
     {% endif %}
     <hr />
+    <form id="shopping_cart" action="{% url 'store:addtocart' %}" method="POST">
+        {% csrf_token %}
     {% if optioncategories %}
     {% for category in optioncategories %}
     <h4>{{ category.title }}</h4>
-    <select>
+    <select name="option" >
         {% for option in category.option_set.all %}
-        <option value="{{ option.title }}">{{ option.title }}</option>
+        <option value="{{ option.pk }}" form="shopping_cart">{{ option.title }}</option>
         {% endfor %}
     </select>
     {% endfor %}
@@ -43,7 +45,7 @@
     {% endif %}
     {% if accessories %}
     {% for accessory in accessories %}
-    <input checked type="checkbox" name="accessory_price" value="{{ accessory.price }}">{{ accessory.title }} ${{ accessory.price }}<br>
+    <input checked type="checkbox" name="accessory" value="{{ accessory.pk }}">{{ accessory.title }} ${{ accessory.price }}<br>
     {% endfor %}
     <hr />
     {% endif %}
@@ -57,11 +59,8 @@
         {% if product.status == "instock" %}
             <strong>{{ product.stock }} items left</strong>
         {% endif %}
-        <form action="{% url 'store:cartchange' %}" method="POST">
-            {% csrf_token %}
             <label>Quantity:</label>
             <input type="hidden" value="{{ product.pk }}" name="item_id" />
-            <input type="text" value="1" name="add_quantity" />
             <button type="submit" class="btn btn-fefault cart">
                 <i class="fa fa-shopping-cart"></i>
                 Add to cart

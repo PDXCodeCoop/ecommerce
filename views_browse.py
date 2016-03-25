@@ -1,11 +1,25 @@
 from django.shortcuts import render_to_response,  get_object_or_404, redirect
 from django.template.context import RequestContext
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from models import *
 
 ### Store browsing
 def listing(request):
-    products = Product.objects.all()
+    product_list = Product.objects.all()
+    paginator = Paginator(product_list, 6)
+
+    page = request.GET.get('page')
+    #Pagination Code
+    try:
+        products = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        products = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        products = paginator.page(paginator.num_pages)
+
     args = {
         'products':products,
     }
@@ -18,10 +32,6 @@ def listing_category(request, category):
         'products':products,
     }
     return render_to_response('store/shop.html', RequestContext(request,args))
-
-def products(request):
-    args = {}
-    return render_to_response('store/product-details.html', RequestContext(request,args))
 
 def product_detail(request, pid):
     args = {}
