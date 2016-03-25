@@ -30,6 +30,7 @@
         {% lorem 100 w random %}
     {% endif %}
     <hr />
+    {% if product.listed %}
     <form id="shopping_cart" action="{% url 'store:addtocart' %}" method="POST">
         {% csrf_token %}
     {% if optioncategories %}
@@ -43,8 +44,8 @@
     {% endfor %}
     <hr />
     {% endif %}
-    {% if accessories %}
-    {% for accessory in accessories %}
+    {% if product.accessories %}
+    {% for accessory in product.accessories.all %}
     <input checked type="checkbox" name="accessory" value="{{ accessory.pk }}">{{ accessory.title }} ${{ accessory.price }}<br>
     {% endfor %}
     <hr />
@@ -67,6 +68,7 @@
             </button>
         </form>
         {% endif %}
+    {% endif %}
     </div>
 </div>
 <!-- /.row -->

@@ -6,7 +6,7 @@ from models import *
 
 ### Store browsing
 def listing(request):
-    product_list = Product.objects.all()
+    product_list = Product.objects.filter(listed=True)
     paginator = Paginator(product_list, 6)
 
     page = request.GET.get('page')
@@ -27,7 +27,7 @@ def listing(request):
 
 def listing_category(request, category):
     category_id = get_object_or_404(Category, slug=category)
-    products = Product.objects.filter(category=category_id)
+    products = Product.objects.filter(category=category_id, listed=True)
     args = {
         'products':products,
     }
@@ -37,11 +37,9 @@ def product_detail(request, pid):
     args = {}
     product = get_object_or_404(Product, pk=pid)
     optioncategories = OptionCategory.objects.filter(product=product)
-    accessories = Accessory.objects.filter(product=product)
-    related_products = Product.objects.all()[:4]
+    related_products = Product.objects.filter(listed=True)[:4]
     args = {
         'product':product,
-        'accessories': accessories,
         'optioncategories': optioncategories,
         'related_products':related_products,
     }

@@ -7,7 +7,7 @@
 fieldset { display: table-cell; }
 }
 </style>
-
+{% if products %}
 <div class="table-responsive cart_info">
     <table class="table">
         <thead>
@@ -21,34 +21,36 @@ fieldset { display: table-cell; }
             </tr>
         </thead>
         <tbody>
-            {% for product in products %}
+            {% for item in products %}
             <tr>
                 <td class="image">
-                    <a href="{% url 'store:products' product.1.pk %}"><img src="{% thumbnail product.1.mainimage 200x200 %}" alt=""></a>
+                    <a href="{% url 'store:products' item.product.pk %}"><img src="{% thumbnail item.product.mainimage 200x200 %}" alt=""></a>
                 </td>
                 <td class="description">
-                    <h4><a href="{% url 'store:products' product.1.pk %}">{{ product.1.title }}</a></h4>
-                    <p>Product ID: {{ product.1.pk }}</p>
-                    <p>Accessories: {{ product.2.title }}: ${{product.2.price}}</p>
-                    <p>Option: {{ product.3.title }}</p>
-                    {% if product.1.status = "preorder" %}
+                    <h4><a href="{% url 'store:products' item.product.pk %}">{{ item.product.title }}</a></h4>
+                    <p>Product ID: {{ item.product.pk }}</p>
+                    {% if item.accessory %}
+                        <p>Accessories: {{ item.accessory.title }}: ${{  item.accessory.price}} {{ item.accessory.stock }}</p>
+                    {% endif %}
+                    <p>Option: {{ item.option.title }}</p>
+                    {% if item.product.status = "preorder" %}
                     <span style="color:red">This item is currently out of stock, preorders can take a while to process</span>
                     {% endif %}
                 </td>
                 <td class="price">
-                    <p>${{ product.4 }}</p>
+                    <p>${{ item.price }}</p>
                 </td>
                 <td class="quantity cart_quantity">
                     <div class="cart_quantity_button">
                         <form action="{% url 'store:cartchange' %}" method="POST">
                             {% csrf_token %}
                             <input type="hidden" value="{{ forloop.counter0 }}" name="item_id" />
-                            <input class="cart_quantity_input" type="text" name="quantity" value="{{ product.0.quantity }}" autocomplete="off" size="2">
+                            <input class="cart_quantity_input" type="text" name="quantity" value="{{ item.session.quantity }}" autocomplete="off" size="2">
                         </form>
                     </div>
                 </td>
                 <td class="total cart_total">
-                    <p class="cart_total_price">${% widthratio product.4 1 product.0.quantity %}</p>
+                    <p class="cart_total_price">${% widthratio item.price 1 item.session.quantity %}</p>
                 </td>
                 <td class="cart_delete">
                     <a class="cart_quantity_delete" href="{% url 'store:cartdelete' forloop.counter0 %}"><i class="fa fa-times"></i></a>
@@ -99,3 +101,8 @@ fieldset { display: table-cell; }
     </tr>
   </table>
 </div>
+{% else %}
+<div class="container">
+    <h2> There are no items currently in the cart.</h2>
+</div>
+{% endif %}

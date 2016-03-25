@@ -14,135 +14,12 @@ import stripe
 from models import *
 from django.conf import settings
 
-def getModelObject(object, object_id):
-    try:
-        return object.objects.get(pk=object_id)
-    except object.DoesNotExist:
-        return None
-    except KeyError:
-        return None
-
-def processStripe(request, customer = None):
-    args = {}
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-    token = request.POST['stripeToken']
-    amount = request.POST['cc-amount']
-    if customer is None:
-        customer = stripe.Customer.create(
-            source=token,
-            description="New Customer"
-        )
-    try:
-        charge = stripe.Charge.create(
-            amount=int(amount), # amount in cents, again
-            currency="usd",
-            customer=customer.id,
-        )
-        args['cc_result'] = "Your card was successfully charged $" + str(float(amount) /100)
-        #Save New customer to user
-        if request.user.is_authenticated():
-            if not BillingInfo.objects.filter(user=request.user).exists():
-                billing = BillingInfo(user=request.user, stripe=customer.id)
-                billing.save()
-            else:
-                request.user.billinginfo.stripe = customer.id
-                request.user.billinginfo.save()
-        order = processProducts(request, request.session.get('cart', []))
-        try:
-            processEmail(order)
-        except:
-            #Set a method to handle errors
-            pass
-    except stripe.error.CardError, e:
-        # The card has been declined
-        args['cc_result'] = e
-    return args
-
-def processEmail(order):
-    d = Context({ 'order': order })
-    msg_plain = render_to_string('email/notification.txt', d)
-    msg_html = render_to_string('email/notification.html', d)
-    send_mail(
-        'We have a new order!',
-        msg_plain,
-        'admin@code.coop',
-        ["bjageman@code.coop"],
-        html_message=msg_html,
-    )
-    if order.shipping_email is not None:
-        msg_plain = render_to_string('email/order_confirm.txt', d)
-        msg_html = render_to_string('email/order_confirm.html', d)
-        send_mail(
-            'Thanks for the order!',
-            msg_plain,
-            'admin@code.coop',
-            [order.shipping_email],
-            html_message=msg_html,
-        )
-
-def setProducts(cart):
-    products = []
-    for item in cart:
-        product = Product.objects.get(pk=item['product_id'])
-        accessory = getModelObject(Accessory, item['accessory'])
-        option = getModelObject(Option, item['option'])
-        price = getProductTotal(product.total(), accessory, option)
-        products.append([item, product, accessory, option, price])
-    return products
-
-def processProducts(request, cart):
-    products = setProducts(request.session.get('cart', []))
-    user = request.user
-    if request.user.is_authenticated():
-        address_text = str(user.shipping.name + " " + user.shipping.address + " " + user.shipping.city + ", " + user.shipping.state + " " + user.shipping.postal_code)
-        order = Order(user=user, shipping_address=address_text, shipping_email=user.shipping.email)
-    else:
-        address_text = str(request.session['shipping']['name'] + " " + request.session['shipping']['address'] + " " + request.session['shipping']['city'] + ", " + request.session['shipping']['state'] + " " + request.session['shipping']['postal_code'])
-        order = Order(shipping_address=address_text, shipping_email=request.session['shipping']['email'])
-    order.save()
-    #Edit the quantity of the products in stock
-    for product in products:
-        quantity = product[0]['quantity']
-        #Verify that the product does not go beyond the stock limit
-        if not (product[1].preorder or product[1].status() == "unlimited"):
-            quantity = product[1].set_limit(quantity)
-        if product[1].stock is not None:
-            product[1].stock = product[1].stock - quantity
-        addProductToOrder(order, product[1], quantity)
-        product[1].save()
-    order.save()
-    if 'coupon' in request.session:
-        coupon = Coupon.objects.get(code=request.session['coupon']['code'])
-        #This will be need to be changed once product associations are implemented
-        order.coupon = coupon.code + ": " + str(coupon.amount_off)
-        order.discount = coupon.amount_off
-        coupon.times_redeemed = coupon.times_redeemed + 1
-        del request.session['coupon']
-        coupon.save()
-    order.save()
-    del request.session['cart']
-    return order
-
-def addProductToOrder(order, product, quantity):
-    productText = str(product.pk) + ") " + product.title
-    productOrder = ProductOrder(order=order, product_log=productText, quantity=quantity, price=product.total())
-    productOrder.save()
-
-def charge(request):
-    args = {}
-    if request.user.is_authenticated():
-        args["shipping"] = get_object_or_404(Shipping, user=request.user)
-    elif 'shipping' in request.session:
-        args["shipping"] = request.session['shipping']
-    else:
-        return HttpResponseRedirect( reverse('store:checkout') )
-    args = processStripe(request)
-    return render_to_response('store/order-complete.html', RequestContext(request,args))
+from views_utils import *
 
 def totalCart(products, discount = None, shipping = None, tax = None):
     total = 0; subtotal = 0
     for product in products:
-        subtotal = subtotal + (float(product[4]))
+        subtotal = subtotal + (float(product['price']) * float(product['session']['quantity']))
     #Handling Discounts, Taxes, and Shipping
     total = subtotal
     if discount is not None:
@@ -202,14 +79,6 @@ def getShipping(request):
         return request.session['shipping']
     else:
         return None
-
-#Adds the total of all accessories and options
-def getProductTotal(product, accessory, option):
-    if accessory is None: accessory_price = 0
-    else: accessory_price = accessory.price
-    if option is None: option_price = 0
-    else: option_price = option.price
-    return product + accessory_price + option_price
 
 ### Checkout
 def checkout(request):
