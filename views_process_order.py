@@ -42,12 +42,13 @@ def processStripe(request, customer = None):
         except:
             #Set a method to handle errors
             pass
+        charge_amount = int(order.total * 100)
         charge = stripe.Charge.create(
-            amount=int(order.total), # amount in cents, again
+            amount=charge_amount, # amount in cents, again
             currency="usd",
             customer=customer.id,
         )
-        args['cc_result'] = "Your card was successfully charged $" + str(float(order.total))
+        args['cc_result'] = "Your card was successfully charged $%.2f" % (charge_amount / 100)
     except stripe.error.CardError, e:
         # The card has been declined
         args['cc_result'] = e
