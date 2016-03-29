@@ -8,6 +8,22 @@ def getPostValue(request, value):
     else:
         return None
 
+def getPostList(request, value):
+    if value in request.POST:
+        return request.POST.getlist(value)
+    else:
+        return None
+
+def dict_compare(d1, d2):
+    d1_keys = set(d1.keys())
+    d2_keys = set(d2.keys())
+    intersect_keys = d1_keys.intersection(d2_keys)
+    added = d1_keys - d2_keys
+    removed = d2_keys - d1_keys
+    modified = {o : (d1[o], d2[o]) for o in intersect_keys if d1[o] != d2[o]}
+    same = set(o for o in intersect_keys if d1[o] == d2[o])
+    return added, removed, modified, same
+
 def findDuplicateDictInList(dict_compare, dict_list, ignore_keys = []):
     dict_compare_tmp = copy.deepcopy(dict_compare)
     for key in ignore_keys:
@@ -17,8 +33,13 @@ def findDuplicateDictInList(dict_compare, dict_list, ignore_keys = []):
         dict_item_tmp = copy.deepcopy(dict_item)
         for key in ignore_keys:
             del dict_item_tmp[key]
-        shared_items = set(dict_compare_tmp.items()) & set(dict_item.items())
-        if len(shared_items) == len(dict_compare_tmp):
+        d1 = dict_compare_tmp
+        d2 = dict_item_tmp
+        d1_keys = set(d1.keys())
+        d2_keys = set(d2.keys())
+        intersect_keys = d1_keys.intersection(d2_keys)
+        same = set(o for o in intersect_keys if d1[o] == d2[o])
+        if (len(same) == len(dict_compare_tmp)):
             return True
     return False
 
@@ -37,9 +58,13 @@ def getProductTotal(product, accessories, options):
 def setProducts(cart):
     products = []
     for item in cart:
+        accessories = []
+        for accessory in item['accessories']:
+            accessories.append(getModelObject(Product, accessory))
+        options = []
+        for option in item['options']:
+            options.append(getModelObject(Option, option))
         product = Product.objects.get(pk=item['product_id'])
-        accessories = [getModelObject(Product, item['accessories'])]
-        options = [getModelObject(Option, item['options'])]
         price = getProductTotal(product, accessories, options)
         products.append({
             "session": item,

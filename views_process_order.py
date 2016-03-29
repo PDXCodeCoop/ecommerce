@@ -43,7 +43,7 @@ def processStripe(request, customer = None):
             #Set a method to handle errors
             pass
         charge = stripe.Charge.create(
-            amount=int(order.total), # amount in cents, again
+            amount=int(order.stripe_total), # amount in cents, again
             currency="usd",
             customer=customer.id,
         )
@@ -91,15 +91,16 @@ def processProducts(request, cart):
         #Verify that the product does not go beyond the stock limit
         if not (item['product'].preorder or item['product'].status() == "unlimited"):
             quantity = item['product'].set_limit(quantity)
-        if item['accessory'] is not None:
-            if not (item['accessory'].preorder or item['accessory'].status() == "unlimited"):
-                quantity = item['accessory'].set_limit(quantity)
-            if item['accessory'].stock is not None:
-                item['accessory'].stock = item['accessory'].stock - quantity
-            item['accessory'].save()
+        for accessory in item['accessories']:
+            if accessory is not None:
+                if not (accessory.preorder or accessory.status() == "unlimited"):
+                    quantity = accessory.set_limit(quantity)
+                if accessory.stock is not None:
+                    accessory.stock = accessory.stock - quantity
+                accessory.save()
         if item['product'].stock is not None:
             item['product'].stock = item['product'].stock - quantity
-        addProductToOrder(order, item['product'], item['accessory'], item['option'], quantity)
+        addProductToOrder(order, item['product'], item['accessories'], item['options'], quantity)
         item['product'].save()
     order.save()
     if 'coupon' in request.session:
@@ -114,21 +115,14 @@ def processProducts(request, cart):
     del request.session['cart']
     return order
 
-def totalProductOrder(product, accessory):
-    if accessory is not None:
-        return product.total() + accessory.total()
-    else:
-        return product.total()
-
-
-def addProductToOrder(order, product, accessory, option, quantity):
+def addProductToOrder(order, product, accessories, options, quantity):
     productText = str(product.pk) + ") " + product.title
     accessory_title = ""
     option_title = ""
-    if accessory is not None:
+    for accessory in accessories:
         accessory_title = accessory.title
         productText = productText + " w/ " + accessory.title
-    if option is not None:
+    for option in options:
         option_title = option.title
         productText = productText + "(" + option.title +")"
     productOrder = ProductOrder(
@@ -137,7 +131,7 @@ def addProductToOrder(order, product, accessory, option, quantity):
             accessories=accessory_title,
             options=option_title,
             quantity=quantity,
-            price=totalProductOrder(product, accessory)
+            price=getProductTotal(product, accessories, options)
         )
     productOrder.save()
 

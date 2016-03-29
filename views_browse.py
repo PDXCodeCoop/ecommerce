@@ -38,9 +38,12 @@ def product_detail(request, pid):
     product = get_object_or_404(Product, pk=pid)
     optioncategories = OptionCategory.objects.filter(product=product)
     related_products = Product.objects.filter(listed=True)[:4]
+    accessories_form = AccessoriesForm(); options_form = OptionsForm()
     args = {
         'product':product,
         'optioncategories': optioncategories,
         'related_products':related_products,
+        'accessories_form':accessories_form,
+        'options_form':options_form,
     }
     return render_to_response('store/product-details.html', RequestContext(request,args))

@@ -18,20 +18,20 @@ def addToCart(request):
         if 'item_id' in request.POST:
             product_id = request.POST['item_id']
             product = get_object_or_404(Product, pk = product_id)
-            accessories = None
+            accessories = []
             if product.preorder or product.status() == "unlimited" or int(product.stock) >= 1:
-                if getPostValue(request, "accessories") is not None:
+                for accessory_pk in getPostList(request, "accessories"):
                     try:
-                        accessories = get_object_or_404(Product, pk = getPostValue(request, "accessories"))
+                        accessory = get_object_or_404(Product, pk = accessory_pk)
                     except Product.DoesNotExist:
                         return HttpResponseRedirect( reverse('store:checkout') )
-                    if not (accessories is not None and accessories.preorder or accessories.status() == "unlimited" or int(accessories.stock) >= 1):
-                        return HttpResponseRedirect( reverse('store:checkout') )
+                    if (accessory is not None and (accessory.preorder or accessory.status() == "unlimited" or int(accessory.stock) >= 1)):
+                        accessories.append(accessory)
                 newCartItem = {
-                    "product_id": product.pk,
-                    "quantity": 1,
-                    "accessories": getPostValue(request, "accessories"),
-                    "options": getPostValue(request, "options"),
+                    u"product_id": product.pk,
+                    u"quantity": 1,
+                    u"accessories": getPostList(request, "accessories"),
+                    u"options": getPostList(request, "options"),
                     }
                 if not findDuplicateDictInList(newCartItem, cart, ['quantity']):
                     cart.append(newCartItem)

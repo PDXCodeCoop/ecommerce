@@ -56,6 +56,9 @@ class Order(models.Model):
         subtotal = self.subtotal
         total = subtotal + self.shipping_cost + self.tax - self.discount
         return total
+    @property
+    def stripe_total(self):
+        return self.total * 100
     def __unicode__(self):
         return "Order ID #%s - %s" % (self.pk, self.user)
 

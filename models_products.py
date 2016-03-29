@@ -69,3 +69,25 @@ class Feature(models.Model):
     product = models.ForeignKey(Product, blank=True, null=True)
     def __unicode__(self):
         return self.header
+
+"""
+Forms Models
+"""
+
+class AccessoriesForm(forms.Form):
+    class Meta:
+        model = Product
+        fields = ['accessories']
+    accessories = forms.ModelMultipleChoiceField(
+        queryset = Product.objects.filter(),
+        widget  = forms.CheckboxSelectMultiple,
+    )
+
+class OptionsForm(forms.Form):
+    class Meta:
+        model = Product
+        fields = ['options']
+    options = forms.ModelMultipleChoiceField(
+        queryset = OptionCategory.objects.all(),
+        widget  = forms.CheckboxSelectMultiple,
+    )
