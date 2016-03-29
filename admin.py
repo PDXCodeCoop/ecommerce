@@ -37,8 +37,6 @@ class OrderAdmin(admin.ModelAdmin):
         ProductOrderInLine,
     ]
 
-
-admin.site.register(Accessory)
 admin.site.register(Option)
 admin.site.register(Shipping)
 admin.site.register(BillingInfo)

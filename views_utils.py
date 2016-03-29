@@ -1,4 +1,4 @@
-from models import Product, Accessory, Option
+from models import Product, Option
 import copy
 
 

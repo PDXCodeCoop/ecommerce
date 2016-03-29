@@ -32,31 +32,6 @@ class Option(models.Model):
     def __unicode__(self):
         return "%s: %s" % (self.category, self.title)
 
-class Accessory(models.Model):
-    title = models.CharField(max_length=100)
-    description = models.TextField(null=True, blank=True)
-    price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
-    discount = models.DecimalField(max_digits=6, decimal_places=2, default=0)
-    stock = models.IntegerField(null=True, blank=True)
-    preorder = models.BooleanField(default = False)
-    def __unicode__(self):
-        return "%s" % (self.title)
-    def total(self):
-        return (self.price - self.discount) - (self.price * self.percent_off/100)
-    def set_limit(self, quantity):
-        quantity = int(quantity)
-        if self.purchase_limit is not None and quantity > self.purchase_limit:
-            quantity = self.purchase_limit
-        if self.stock is not None and quantity > self.stock:
-            quantity = self.stock
-        return quantity
-    def status(self):
-        if self.stock is None: return "unlimited"
-        if self.stock > 0: return "instock"
-        if self.stock <= 0:
-            if self.preorder: return "preorder"
-            else: return "outofstock"
-
 # Create your models here.
 class Product(models.Model):
     mainimage = ThumbnailerImageField(upload_to='products', blank=True)

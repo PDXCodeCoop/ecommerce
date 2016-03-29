@@ -46,7 +46,9 @@
     {% endif %}
     {% if product.accessories %}
     {% for accessory in product.accessories.all %}
+    {% if accessory.status != "outofstock" %}
     <input checked type="checkbox" name="accessory" value="{{ accessory.pk }}">{{ accessory.title }} ${{ accessory.price }}<br>
+    {% endif %}
     {% endfor %}
     <hr />
     {% endif %}
