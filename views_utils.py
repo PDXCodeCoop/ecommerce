@@ -23,25 +23,29 @@ def findDuplicateDictInList(dict_compare, dict_list, ignore_keys = []):
     return False
 
 #Adds the total of all accessories and options
-def getProductTotal(product, accessory, option):
-    if accessory is None: accessory_price = 0
-    else: accessory_price = accessory.total()
-    if option is None: option_price = 0
-    else: option_price = option.price
+def getProductTotal(product, accessories, options):
+    accessory_price = 0
+    option_price = 0
+    for accessory in accessories:
+        if accessory.price is not None:
+            accessory_price = accessory_price + accessory.total()
+    for option in options:
+        if option.price is not None:
+            option_price = option_price + option.price
     return product.total() + accessory_price + option_price
 
 def setProducts(cart):
     products = []
     for item in cart:
         product = Product.objects.get(pk=item['product_id'])
-        accessory = getModelObject(Product, item['accessory'])
-        option = getModelObject(Option, item['option'])
-        price = getProductTotal(product, accessory, option)
+        accessories = [getModelObject(Product, item['accessories'])]
+        options = [getModelObject(Option, item['options'])]
+        price = getProductTotal(product, accessories, options)
         products.append({
             "session": item,
             "product": product,
-            "accessory": accessory,
-            "option": option,
+            "accessories": accessories,
+            "options": options,
             "price": price
             })
     return products

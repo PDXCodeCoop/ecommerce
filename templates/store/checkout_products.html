@@ -29,10 +29,22 @@ fieldset { display: table-cell; }
                 <td class="description">
                     <h4><a href="{% url 'store:products' item.product.pk %}">{{ item.product.title }}</a></h4>
                     <p>Product ID: {{ item.product.pk }}</p>
-                    {% if item.accessory %}
-                        <p>Accessories: {{ item.accessory.title }}: ${{  item.accessory.price}} {{ item.accessory.stock }}</p>
+                    {% if item.accessories %}
+                        <ul class ="list-unstyled">
+                        <strong>Accessories: </strong>
+                            {% for accessory in item.accessories %}
+                            <li>{{ accessory.title }}: ${{ accessory.price}}</li>
+                            {% endfor %}
+                        </ul>
                     {% endif %}
-                    <p>Option: {{ item.option.title }}</p>
+                    {% if item.options %}
+                    <ul class ="list-unstyled">
+                    <strong>Options: </strong>
+                        {% for option in item.options %}
+                            <li>{{ option.title }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
                     {% if item.product.status = "preorder" %}
                     <span style="color:red">This item is currently out of stock, preorders can take a while to process</span>
                     {% endif %}

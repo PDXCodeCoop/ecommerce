@@ -18,20 +18,20 @@ def addToCart(request):
         if 'item_id' in request.POST:
             product_id = request.POST['item_id']
             product = get_object_or_404(Product, pk = product_id)
-            accessory = None
+            accessories = None
             if product.preorder or product.status() == "unlimited" or int(product.stock) >= 1:
-                if getPostValue(request, "accessory") is not None:
+                if getPostValue(request, "accessories") is not None:
                     try:
-                        accessory = get_object_or_404(Product, pk = getPostValue(request, "accessory"))
+                        accessories = get_object_or_404(Product, pk = getPostValue(request, "accessories"))
                     except Product.DoesNotExist:
                         return HttpResponseRedirect( reverse('store:checkout') )
-                    if not (accessory is not None and accessory.preorder or accessory.status() == "unlimited" or int(accessory.stock) >= 1):
+                    if not (accessories is not None and accessories.preorder or accessories.status() == "unlimited" or int(accessories.stock) >= 1):
                         return HttpResponseRedirect( reverse('store:checkout') )
                 newCartItem = {
                     "product_id": product.pk,
                     "quantity": 1,
-                    "accessory": getPostValue(request, "accessory"),
-                    "option": getPostValue(request, "option"),
+                    "accessories": getPostValue(request, "accessories"),
+                    "options": getPostValue(request, "options"),
                     }
                 if not findDuplicateDictInList(newCartItem, cart, ['quantity']):
                     cart.append(newCartItem)
@@ -47,9 +47,9 @@ def changeQuantity(request):
         try:
             product = get_object_or_404(Product, pk = item['product_id'])
             item['quantity'] = product.set_limit(int(getPostValue(request, "quantity")))
-            if item['accessory'] is not None:
-                accessory = get_object_or_404(Product, pk = item['accessory'])
-                item['quantity'] = accessory.set_limit(item['quantity'])
+            if item['accessories'] is not None:
+                accessories = get_object_or_404(Product, pk = item['accessory'])
+                item['quantity'] = accessories.set_limit(item['quantity'])
             if item['quantity'] < 0:
                 del cart[item_id]
         except Product.DoesNotExist:
