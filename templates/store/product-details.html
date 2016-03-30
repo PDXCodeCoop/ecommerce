@@ -38,7 +38,7 @@
     <h4>{{ category.title }}</h4>
     <select name="options" >
         {% for option in category.option_set.all %}
-        <option value="{{ option.pk }}" form="shopping_cart">{{ option.title }}</option>
+        <option value="{{ option.pk }}" form="shopping_cart">{{ option.title }}: ${{ option.price }}</option>
         {% endfor %}
     </select>
     {% endfor %}

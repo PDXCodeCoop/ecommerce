@@ -41,7 +41,7 @@ fieldset { display: table-cell; }
                     <ul class ="list-unstyled">
                     <strong>Options: </strong>
                         {% for option in item.options %}
-                            <li>{{ option.title }}</li>
+                            <li>{{ option.title }}: ${{ option.price }}</li>
                         {% endfor %}
                     </ul>
                     {% endif %}
