@@ -1,4 +1,17 @@
-Hello {{ message.name }}, thanks so much for getting in touch with us. We'll get back to you as soon as we can!
+Order Created: {{ order.created }}
+Ship to: {{ order.shipping_address }}
+
+{% for productorder in order.productorder_set.all %}
+Product: {{ productorder.product_log }}
+Price: ${{ productorder.price }}
+Quantity: {{ productorder.quantity }}
+Total: ${{ productorder.total }}
+{% endfor %}
+Subtotal:${{ order.subtotal }}
+Discount({{ order.coupon }}):  -${{ order.discount }}
+Total: ${{ order.total }}
+
+Thanks so much for ordering from us. We usually ship within 1-2 business days!
 
 Sincerely,
 

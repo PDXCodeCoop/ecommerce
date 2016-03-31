@@ -37,11 +37,7 @@ def processStripe(request, customer = None):
                 request.user.billinginfo.stripe = customer.id
                 request.user.billinginfo.save()
         order = processProducts(request, request.session.get('cart', []))
-        try:
-            processEmail(order)
-        except:
-            #Set a method to handle errors
-            pass
+        processEmail(order)
         charge = stripe.Charge.create(
             amount=int(order.stripe_total), # amount in cents, again
             currency="usd",
@@ -57,26 +53,30 @@ def processStripe(request, customer = None):
     return args
 
 def processEmail(order):
-    d = Context({ 'order': order })
-    msg_plain = render_to_string('email/notification.txt', d)
-    msg_html = render_to_string('email/notification.html', d)
-    send_mail(
-        'We have a new order!',
-        msg_plain,
-        'admin@code.coop',
-        ["bjageman@code.coop"],
-        html_message=msg_html,
-    )
-    if order.shipping_email is not None:
-        msg_plain = render_to_string('email/order_confirm.txt', d)
-        msg_html = render_to_string('email/order_confirm.html', d)
+    try:
+        d = Context({ 'order': order })
+        msg_plain = render_to_string('email/notification.txt', d)
+        msg_html = render_to_string('email/notification.html', d)
         send_mail(
-            'Thanks for the order!',
+            'We have a new order!',
             msg_plain,
             'admin@code.coop',
-            [order.shipping_email],
+            ["bjageman@code.coop"],
             html_message=msg_html,
         )
+        if order.shipping_email is not None:
+            msg_plain = render_to_string('email/order_confirm.txt', d)
+            msg_html = render_to_string('email/order_confirm.html', d)
+            send_mail(
+                'Thanks for the order!',
+                msg_plain,
+                'admin@code.coop',
+                [order.shipping_email],
+                html_message=msg_html,
+            )
+        return True
+    except:
+        return False
 
 def processProducts(request, cart):
     products = setProducts(request.session.get('cart', []))
