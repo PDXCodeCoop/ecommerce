@@ -1,3 +1,14 @@
 We just got an order! Here are the details:
 
-{{ order.shipping_address  }}
+Order Created: {{ order.created }}
+Ship to: {{ order.shipping_address }}
+
+{% for productorder in order.productorder_set.all %}
+Product: {{ productorder.product_log }}
+Price: ${{ productorder.price }}
+Quantity: {{ productorder.quantity }}
+Total: ${{ productorder.total }}
+{% endfor %}
+Subtotal:${{ order.subtotal }}
+Discount({{ order.coupon }}):  -${{ order.discount }}
+Total: ${{ order.total }}

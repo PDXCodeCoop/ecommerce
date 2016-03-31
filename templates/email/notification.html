@@ -1,3 +1,38 @@
 We just got an order! Here are the details:
 
-{{ order.shipping_address }}
+Order Created: {{ order.created }}
+Ship to: {{ order.shipping_address }}
+<table class="table table-condensed">
+    <thead>
+        <th>Product Name</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Total</th>
+    </thead>
+    {% for productorder in order.productorder_set.all %}
+    <tr>
+        <td>{{ productorder.product_log }}</td>
+        <td>${{ productorder.price }}</td>
+        <td>{{ productorder.quantity }}</td>
+        <td>${{ productorder.total }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td>Subtotal:</td>
+        <td></td>
+        <td></td>
+        <td>${{ order.subtotal }}</td>
+    </tr>
+    <tr>
+        <td><em>Discount ({{ order.coupon }})</em></td>
+        <td></td>
+        <td></td>
+        <td><em>-${{ order.discount }}</em></td>
+    </tr>
+    <tr>
+        <td><strong>Total</strong></td>
+        <td></td>
+        <td></td>
+        <td><strong>${{ order.total }}</strong></td>
+    </tr>
+</table>
