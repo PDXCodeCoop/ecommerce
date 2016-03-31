@@ -55,8 +55,8 @@ def processStripe(request, customer = None):
 def processEmail(order):
     try:
         d = Context({ 'order': order })
-        msg_plain = render_to_string('email/notification.txt', d)
-        msg_html = render_to_string('email/notification.html', d)
+        msg_plain = render_to_string('email/order_notify.txt', d)
+        msg_html = render_to_string('email/order_notify.html', d)
         send_mail(
             'We have a new order!',
             msg_plain,
