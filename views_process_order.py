@@ -47,7 +47,10 @@ def processStripe(request, customer = None):
             currency="usd",
             customer=customer.id,
         )
-        args['cc_result'] = "Your card was successfully charged $%.2f" % (order.total)
+        args = {
+        'cc_result':"Your card was successfully charged $%.2f" % (order.total),
+        'order': order,
+        }
     except stripe.error.CardError, e:
         # The card has been declined
         args['cc_result'] = e
