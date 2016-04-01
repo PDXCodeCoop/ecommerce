@@ -48,8 +48,9 @@ def changeQuantity(request):
             product = get_object_or_404(Product, pk = item['product_id'])
             item['quantity'] = product.set_limit(int(getPostValue(request, "quantity")))
             if item['accessories'] is not None:
-                accessories = get_object_or_404(Product, pk = item['accessory'])
-                item['quantity'] = accessories.set_limit(item['quantity'])
+                for accessory_pk in item['accessories']:
+                    accessory = get_object_or_404(Product, pk = accessory_pk)
+                    item['quantity'] = accessory.set_limit(item['quantity'])
             if item['quantity'] < 0:
                 del cart[item_id]
         except Product.DoesNotExist:
