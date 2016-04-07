@@ -78,7 +78,7 @@
 <div class="row">
     {% for image in product.images.all %}
     <div class="col-md-3">
-        <img class="img-responsive" src="{% thumbnail image.image 400x400 crop %}" alt="{{ product.title }}">
+        <img class="img-responsive" src="{% thumbnail image.image 400x400 %}" alt="{{ product.title }}">
     </div>
     {% endfor %}
 </div class = "row">
