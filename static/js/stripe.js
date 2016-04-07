@@ -1,4 +1,4 @@
-Stripe.setPublishableKey('pk_test_w3iGW3MRT2nAT5vCwXjoZ68e');
+Stripe.setPublishableKey($("#stripe-pub-key").val());
 function stripeResponseHandler(status, response) {
   var $form = $('#payment-form');
 
