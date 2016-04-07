@@ -19,6 +19,7 @@ from views_utils import *
 
 def processStripe(request, customer = None):
     args = {}
+    order = Order.objects.none()
     stripe.api_key = settings.STRIPE_SECRET_KEY
     token = request.POST['stripeToken']
     amount = request.POST['cc-amount']
@@ -36,19 +37,21 @@ def processStripe(request, customer = None):
             else:
                 request.user.billinginfo.stripe = customer.id
                 request.user.billinginfo.save()
-        order = processProducts(request, request.session.get('cart', []))
-        processEmail(order)
+        order, products, accessories = processProducts(request, request.session.get('cart', []))
         charge = stripe.Charge.create(
             amount=int(order.stripe_total), # amount in cents, again
             currency="usd",
             customer=customer.id,
         )
+        saveProducts(products, accessories)
+        processEmail(order)
         args = {
         'cc_result':"Your card was successfully charged $%.2f" % (order.total),
         'order': order,
         }
     except stripe.error.CardError, e:
         # The card has been declined
+        order.delete()
         args['cc_result'] = e
     return args
 
@@ -78,7 +81,15 @@ def processEmail(order):
     except:
         return False
 
+def saveProducts(products, accessories):
+    for product in products:
+        product.save()
+    for accessory in accessories:
+        accessory.save()
+
 def processProducts(request, cart):
+    accessoryModels = []
+    productModels = []
     products = setProducts(request.session.get('cart', []))
     user = request.user
     if request.user.is_authenticated():
@@ -100,11 +111,12 @@ def processProducts(request, cart):
                     quantity = accessory.set_limit(quantity)
                 if accessory.stock is not None:
                     accessory.stock = accessory.stock - quantity
-                accessory.save()
+                #accessory.save()
+                accessoryModels.append(accessory)
         if item['product'].stock is not None:
             item['product'].stock = item['product'].stock - quantity
         addProductToOrder(order, item['product'], item['accessories'], item['options'], quantity)
-        item['product'].save()
+        productModels.append(item['product'])
     order.save()
     if 'coupon' in request.session:
         coupon = Coupon.objects.get(code=request.session['coupon']['code'])
@@ -116,7 +128,7 @@ def processProducts(request, cart):
         coupon.save()
     order.save()
     del request.session['cart']
-    return order
+    return order, productModels, accessoryModels
 
 def addProductToOrder(order, product, accessories, options, quantity):
     productText = str(product.pk) + ") " + product.title
