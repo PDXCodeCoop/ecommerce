@@ -46,7 +46,6 @@ def shipping(request):
             shipping = form.save(commit=False)
             if request.user.is_authenticated():
                 shipping.user = request.user
-                shipping.email = request.user.email
             shipping.save()
         else:
             return HttpResponseRedirect( reverse('store:index') ) #Report Error Here
