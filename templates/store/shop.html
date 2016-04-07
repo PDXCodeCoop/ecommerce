@@ -31,9 +31,9 @@
             </h3>
             <p>
               {% if product.description|length > 0 %}
-                {{ product.description }}
+                {{ product.description|safe }}
               {% else %}
-                This product does not have a description yet. When the creator gets around to it you'll have a pretty sweet set of info on this thing.
+                This product does not have a description yet.
               {% endif %}
             </p>
         </div>

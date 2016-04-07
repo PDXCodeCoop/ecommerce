@@ -29,7 +29,7 @@
                             <h4 class="pull-right">${{product.total}}</h4>
                             <h4><a href="{% url 'store:products' product.pk %}">{{product.title}}</a>
                             </h4>
-                            <p>{{ product.description }}</p>
+                            <p>{{ product.description|safe }}</p>
                         </div>
                     </div>
                 </div>

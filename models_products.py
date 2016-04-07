@@ -1,6 +1,7 @@
 from django.db import models
 from django import forms
 from easy_thumbnails.fields import ThumbnailerImageField
+from ckeditor.fields import RichTextField
 
 class Category(models.Model):
     title = models.CharField(max_length=100)
@@ -28,7 +29,7 @@ class Product(models.Model):
     mainimage = ThumbnailerImageField(upload_to='products', blank=True)
     title = models.CharField(max_length=100)
     subtitle = models.CharField(max_length=100, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
+    description = RichTextField(null=True, blank=True)
     accessories = models.ManyToManyField('self', blank=True)
     options = models.ManyToManyField(OptionCategory, blank=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
