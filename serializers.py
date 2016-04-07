@@ -13,6 +13,11 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
         model = Category
         fields = ('title', 'slug')
 
+class AccessorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('title', 'subtitle', 'description', 'category', 'options',
+        'price', 'discount', 'percent_off', 'total', 'stock', 'preorder','status', 'listed')
 
 class OptionCategorySerializer(serializers.HyperlinkedModelSerializer):
     option_set = serializers.StringRelatedField(many=True)
@@ -23,6 +28,8 @@ class OptionCategorySerializer(serializers.HyperlinkedModelSerializer):
 class ProductSerializer(serializers.HyperlinkedModelSerializer):
     options = OptionCategorySerializer(many=True, read_only=True)
     category = CategorySerializer()
+    accessories = AccessorySerializer(many=True, read_only=True)
     class Meta:
         model = Product
-        fields = ('__all__')
+        fields = ('title', 'subtitle', 'description', 'category', 'options',
+        'accessories', 'price', 'discount', 'percent_off', 'total', 'stock', 'preorder','status', 'listed')

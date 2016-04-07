@@ -23,7 +23,6 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    inlines = [ ProductInline, ]
     prepopulated_fields = {'slug': ('title',)}
 
 @admin.register(OptionCategory)
